@@ -1,0 +1,20 @@
+# Environment
+.env
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Dev tools
+.playwright-mcp/
+node_modules/
+output/
+
+# Docker (not needed for Vercel deployment)
+Dockerfile.claude
+docker-compose.yml

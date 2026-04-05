@@ -18,3 +18,4 @@ output/
 # Docker (not needed for Vercel deployment)
 Dockerfile.claude
 docker-compose.yml
+.vercel

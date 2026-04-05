@@ -932,11 +932,11 @@ BMS_IsolationFault    (0=OK, 1=Warning, 2=Fault)</code></pre>
   function applyTheme(light) {
     if (light) { html.classList.add('light'); } else { html.classList.remove('light'); }
     label.textContent = light ? 'Dark Mode' : 'Light Mode';
-    localStorage.setItem('fuso-hmi-theme', light ? 'light' : 'dark');
+    localStorage.setItem('zth-theme', light ? 'light' : 'dark');
   }
 
   // Load saved theme
-  const saved = localStorage.getItem('fuso-hmi-theme');
+  const saved = localStorage.getItem('zth-theme');
   if (saved === 'light') applyTheme(true);
 
   sw.addEventListener('click', function() {

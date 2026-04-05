@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dante4000 | Learning Material</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script>try{if(localStorage.getItem('rl-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+<script>try{if(localStorage.getItem('zth-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <style>
 :root {
   --bg: #0a0c12;
@@ -171,10 +171,10 @@ footer {
     var isLight = h.getAttribute('data-theme') === 'light';
     if (isLight) {
       h.removeAttribute('data-theme');
-      try { localStorage.setItem('rl-theme', 'dark'); } catch (e) {}
+      try { localStorage.setItem('zth-theme', 'dark'); } catch (e) {}
     } else {
       h.setAttribute('data-theme', 'light');
-      try { localStorage.setItem('rl-theme', 'light'); } catch (e) {}
+      try { localStorage.setItem('zth-theme', 'light'); } catch (e) {}
     }
   });
 })();

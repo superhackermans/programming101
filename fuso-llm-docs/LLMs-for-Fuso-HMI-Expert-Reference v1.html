@@ -1178,12 +1178,12 @@ Rules:
 <script>
 (function(){
   var t=document.getElementById('themeToggle'),h=document.documentElement;
-  var saved=localStorage.getItem('fuso-hmi-theme');
+  var saved=localStorage.getItem('zth-theme');
   if(saved==='light') h.setAttribute('data-theme','light');
   t.addEventListener('click',function(){
     var isLight=h.getAttribute('data-theme')==='light';
-    if(isLight){h.removeAttribute('data-theme');localStorage.setItem('fuso-hmi-theme','dark')}
-    else{h.setAttribute('data-theme','light');localStorage.setItem('fuso-hmi-theme','light')}
+    if(isLight){h.removeAttribute('data-theme');localStorage.setItem('zth-theme','dark')}
+    else{h.setAttribute('data-theme','light');localStorage.setItem('zth-theme','light')}
   });
   var ham=document.getElementById('hamburger'),sb=document.getElementById('sidebar'),ov=document.getElementById('sidebar-overlay');
   ham.addEventListener('click',function(){ham.classList.toggle('open');sb.classList.toggle('open');ov.classList.toggle('open')});

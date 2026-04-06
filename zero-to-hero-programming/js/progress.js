@@ -187,6 +187,9 @@
     document.querySelectorAll('.toc-check[data-chapter="' + ch + '"]').forEach(function (el) {
       el.classList.toggle('done', done);
     });
+    document.querySelectorAll('.phase-ch-item[data-chapter="' + ch + '"]').forEach(function (el) {
+      el.classList.toggle('done', done);
+    });
   }
 
   function injectChapterChecks() {
@@ -205,6 +208,10 @@
         toggleChapter(ch);
       });
       h2.appendChild(btn);
+    });
+    document.querySelectorAll('.phase-ch-item[data-chapter]').forEach(function (el) {
+      var ch = el.getAttribute('data-chapter');
+      if (chapters[ch]) el.classList.add('done');
     });
     document.querySelectorAll('.toc-link').forEach(function (link) {
       var href = link.getAttribute('href') || '';

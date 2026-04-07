@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Part 2 of the DFS Engine Build Guide: sharp odds integration, probability models, combination generation, and multi-factor scoring.">
+<title>DFS Engine Build Guide - Part 2</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/dfs-engine/css/design-system.css">
+<script>try{if(localStorage.getItem('zth-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+<script>try{var z=localStorage.getItem('zth-zoom');if(z&&+z>=50&&+z<=200)document.documentElement.style.zoom=+z/100}catch(e){}</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="var(--accent)"></path>
+    </marker>
+  </defs>
+</svg>
+
+<button class="hamburger" id="hamburger" aria-label="Open navigation">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<button class="toggle" id="themeToggle" aria-label="Toggle theme">
+  <svg class="is" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  <svg class="im" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+
+<aside class="sidebar" id="sidebar">
+  <a href="/" class="sidebar-logo"><span>Learning Material</span>DFS Engine Build Guide</a>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Overview</div>
+    <a href="/dfs-engine/index.html#overview" class="toc-link"><span class="toc-num">00</span>What You Are Building</a>
+    <a href="/dfs-engine/index.html#stack" class="toc-link"><span class="toc-num">01</span>Tech Stack</a>
+    <a href="/dfs-engine/index.html#structure" class="toc-link"><span class="toc-num">02</span>Project Structure</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Foundation</div>
+    <a href="/dfs-engine/part-1.html#step1" class="toc-link"><span class="toc-num">03</span>Project Initialization</a>
+    <a href="/dfs-engine/part-1.html#step2" class="toc-link"><span class="toc-num">04</span>Core Type System</a>
+    <a href="/dfs-engine/part-1.html#step3" class="toc-link"><span class="toc-num">05</span>Platform Adapter</a>
+    <a href="/dfs-engine/part-1.html#step4" class="toc-link"><span class="toc-num">06</span>PrizePicks Client</a>
+    <a href="/dfs-engine/part-1.html#step5" class="toc-link"><span class="toc-num">07</span>Underdog Client</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Core Engine</div>
+    <a href="#step6" class="toc-link"><span class="toc-num">08</span>Sharp Odds and +EV</a>
+    <a href="#step7" class="toc-link"><span class="toc-num">09</span>Probability Engine</a>
+    <a href="#step8" class="toc-link"><span class="toc-num">10</span>Combinations and Scoring</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Infrastructure</div>
+    <a href="/dfs-engine/part-3.html#step9" class="toc-link"><span class="toc-num">11</span>Redis Cache</a>
+    <a href="/dfs-engine/part-3.html#step10" class="toc-link"><span class="toc-num">12</span>Browser Submission</a>
+    <a href="/dfs-engine/part-3.html#step11" class="toc-link"><span class="toc-num">13</span>Database Schema</a>
+    <a href="/dfs-engine/part-3.html#step12" class="toc-link"><span class="toc-num">14</span>CLI Entry Point</a>
+    <a href="/dfs-engine/part-3.html#step13" class="toc-link"><span class="toc-num">15</span>Config and Logger</a>
+    <a href="/dfs-engine/part-3.html#step14" class="toc-link"><span class="toc-num">16</span>Docker Setup</a>
+    <a href="/dfs-engine/part-3.html#step15" class="toc-link"><span class="toc-num">17</span>Testing</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Reference</div>
+    <a href="/dfs-engine/part-3.html#build-order" class="toc-link"><span class="toc-num">A</span>Build Order</a>
+    <a href="/dfs-engine/part-3.html#lessons" class="toc-link"><span class="toc-num">B</span>Key Lessons</a>
+    <a href="/dfs-engine/part-3.html#api-ref" class="toc-link"><span class="toc-num">C</span>API Endpoints</a>
+    <a href="/dfs-engine/part-3.html#diff" class="toc-link"><span class="toc-num">D</span>What Changed</a>
+  </div>
+</aside>
+
+<div class="main" id="main-content">
+  <section class="hero hero-sm">
+    <div class="hero-badge">Part 2 &mdash; Core Engine</div>
+    <h1>Sharp odds, probability models, and the scoring system</h1>
+    <p class="hero-sub">Compare DFS platform lines against sharp sportsbook consensus to find +EV edges. Model probabilities with Normal CDF and Monte Carlo simulation. Generate and score optimal slip combinations.</p>
+    <div class="hero-meta"><span>Steps 6&ndash;8</span><span>+EV identification</span><span>Multi-factor scoring</span></div>
+  </section>
+
+  <div class="content-wrap">
+
+    <!-- ===== STEP 6 ===== -->
+    <section id="step6">
+      <div class="chapter-header">
+        <span class="chapter-label">Step 6</span>
+        <h2>Sharp odds &mdash; +EV identification</h2>
+      </div>
+      <p class="chapter-lead">This is the core edge. Compare DFS platform lines against sharp sportsbook consensus to find +EV props.</p>
+
+      <h3><code>src/odds/the-odds-api.ts</code></h3>
+<pre><code>import { config } from '../config.js';
+import { logger } from '../utils/logger.js';
+
+// The Odds API &mdash; https://the-odds-api.com/liveapi/guides/v4/
+// Free tier: 500 credits/month. Each call costs (markets * regions) credits.
+
+const BASE = 'https://api.the-odds-api.com/v4';
+
+interface OddsApiOutcome {
+  name: string;        // Player name
+  description: string; // "Over" or "Under"
+  price: number;       // American odds (-110, +120, etc.)
+  point: number;       // The line (24.5)
+}
+
+interface OddsApiMarket {
+  key: string;         // e.g. "player_points"
+  outcomes: OddsApiOutcome[];
+}
+
+interface OddsApiBookmaker {
+  key: string;         // e.g. "draftkings", "fanduel"
+  title: string;
+  markets: OddsApiMarket[];
+}
+
+export async function fetchPlayerProps(
+  sportKey: string,
+  markets: string[],
+): Promise&lt;Map&lt;string, { overProb: number; underProb: number; line: number }&gt;&gt; {
+
+  const eventsUrl = `${BASE}/sports/${sportKey}/events?apiKey=${config.THE_ODDS_API_KEY}`;
+  const eventsRes = await fetch(eventsUrl);
+  const events: any[] = await eventsRes.json();
+
+  const allProps = new Map&lt;string, { overProb: number; underProb: number; line: number }&gt;();
+
+  for (const event of events) {
+    const marketsParam = markets.join(',');
+    const oddsUrl = `${BASE}/sports/${sportKey}/events/${event.id}/odds` +
+      `?apiKey=${config.THE_ODDS_API_KEY}` +
+      `&amp;regions=us` +
+      `&amp;markets=${marketsParam}` +
+      `&amp;oddsFormat=american`;
+
+    const oddsRes = await fetch(oddsUrl);
+    if (!oddsRes.ok) continue;
+    const oddsData = await oddsRes.json();
+
+    for (const bookmaker of (oddsData.bookmakers ?? []) as OddsApiBookmaker[]) {
+      for (const market of bookmaker.markets) {
+        for (const outcome of market.outcomes) {
+          const key = `${outcome.name}|${market.key}|${outcome.point}`;
+          const impliedProb = americanToImplied(outcome.price);
+
+          if (!allProps.has(key)) {
+            allProps.set(key, { overProb: 0, underProb: 0, line: outcome.point });
+          }
+          const entry = allProps.get(key)!;
+
+          if (outcome.description === 'Over') {
+            entry.overProb = entry.overProb ? (entry.overProb + impliedProb) / 2 : impliedProb;
+          } else {
+            entry.underProb = entry.underProb ? (entry.underProb + impliedProb) / 2 : impliedProb;
+          }
+        }
+      }
+    }
+  }
+
+  return allProps;
+}
+
+/** Convert American odds to implied probability (0-1). Removes vig naively. */
+function americanToImplied(odds: number): number {
+  if (odds &gt; 0) {
+    return 100 / (odds + 100);
+  } else {
+    return Math.abs(odds) / (Math.abs(odds) + 100);
+  }
+}</code></pre>
+
+      <h3><code>src/engine/ev.ts</code></h3>
+<pre><code>import type { Line } from '../sports/models.js';
+import { logger } from '../utils/logger.js';
+
+/**
+ * Enriches DFS lines with sharp market probabilities and calculates +EV.
+ *
+ * The core insight: DFS platforms set their own lines (projections).
+ * Sharp sportsbooks (Pinnacle, consensus of DraftKings/FanDuel/BetMGM) set
+ * market-efficient lines. When a DFS line diverges from the sharp consensus,
+ * that's a potential +EV edge.
+ *
+ * Example: PrizePicks sets Jokic Points at 26.5.
+ *          Sharp consensus (average of 5 books) implies Over at 57%.
+ *          PrizePicks pays ~1.8x for a correct 2-pick.
+ *          Breakeven is 55.5%. 57% &gt; 55.5% = +EV.
+ */
+export function enrichWithEV(
+  dfsLines: Line[],
+  sharpOdds: Map&lt;string, { overProb: number; underProb: number; line: number }&gt;,
+  profitThreshold: number,
+): Line[] {
+  const enriched: Line[] = [];
+
+  for (const line of dfsLines) {
+    const playerName = `${line.firstName} ${line.lastName}`;
+    const marketKey = propTypeToOddsApiMarket(line.propType);
+    const lookupKey = `${playerName}|${marketKey}|${line.propValue}`;
+
+    const sharp = sharpOdds.get(lookupKey);
+    if (!sharp) {
+      enriched.push(line);
+      continue;
+    }
+
+    const sharpProb = line.betDirection === 'Over' ? sharp.overProb : sharp.underProb;
+    const ev = sharpProb - profitThreshold;
+
+    enriched.push({
+      ...line,
+      sharpProbability: sharpProb,
+      ev,
+    });
+
+    if (ev &gt; 0.02) {
+      logger.info({
+        player: playerName,
+        prop: line.propType,
+        value: line.propValue,
+        direction: line.betDirection,
+        sharpProb: (sharpProb * 100).toFixed(1) + '%',
+        ev: (ev * 100).toFixed(1) + '%',
+      }, '+EV edge found');
+    }
+  }
+
+  return enriched;
+}
+
+function propTypeToOddsApiMarket(propType: string): string {
+  const map: Record&lt;string, string&gt; = {
+    'Points': 'player_points',
+    'Rebounds': 'player_rebounds',
+    'Assists': 'player_assists',
+    'Steals': 'player_steals',
+    'Blocks': 'player_blocks',
+    'Turnovers': 'player_turnovers',
+    '3-Pointers Made': 'player_threes',
+    'Pass Yards': 'player_pass_yds',
+    'Rush Yards': 'player_rush_yds',
+    'Receiving Yards': 'player_reception_yds',
+    'Receptions': 'player_receptions',
+    'Strikeouts': 'pitcher_strikeouts',
+  };
+  return map[propType] ?? propType.toLowerCase().replace(/\s+/g, '_');
+}</code></pre>
+
+      <div class="callout info">
+        <div class="callout-title">The +EV formula</div>
+        <p>When the sharp market consensus gives a prop a higher probability than the DFS platform's breakeven threshold, that's a positive expected value edge. The system compares sharp implied probability against the profit threshold (54.5% for standard payouts) to find these edges.</p>
+      </div>
+    </section>
+
+    <!-- ===== STEP 7 ===== -->
+    <section id="step7">
+      <div class="chapter-header">
+        <span class="chapter-label">Step 7</span>
+        <h2>Probability engine</h2>
+      </div>
+      <p class="chapter-lead">Port the original codebase's probability calculations. Normal CDF for golf and any prop with known mean and standard deviation. Monte Carlo simulation for NBA historical stats.</p>
+
+      <h3><code>src/engine/probability.ts</code></h3>
+<pre><code>import cdf from '@stdlib/stats-base-dists-normal-cdf';
+import { mean, standardDeviation } from 'simple-statistics';
+
+/**
+ * Normal CDF probability.
+ * Used for golf (DataGolf strokes-gained model) and any prop with
+ * a known mean + standard deviation.
+ */
+export function normalCdfProbability(
+  expectedValue: number,
+  lineValue: number,
+  stdDeviation: number,
+  direction: 'Over' | 'Under',
+): number {
+  const gap = expectedValue - lineValue;
+  const underProb = cdf(gap, 0, stdDeviation);
+  return direction === 'Under' ? underProb : 1 - underProb;
+}
+
+/**
+ * Monte Carlo simulation probability.
+ * Takes a player's recent game stats for a prop type,
+ * computes mean and std dev, then runs N simulations
+ * drawing from a normal distribution.
+ */
+export function monteCarloSimProbability(
+  recentStats: number[],
+  lineValue: number,
+  direction: 'Over' | 'Under',
+  nSimulations: number = 10_000,
+): number {
+  if (recentStats.length &lt; 3) return 0;
+
+  const mu = mean(recentStats);
+  const sigma = standardDeviation(recentStats);
+  if (sigma === 0) return mu &gt; lineValue ? (direction === 'Over' ? 1 : 0) : (direction === 'Under' ? 1 : 0);
+
+  let count = 0;
+  for (let i = 0; i &lt; nSimulations; i++) {
+    const simulated = randomNormal(mu, sigma);
+    if (direction === 'Under' &amp;&amp; simulated &lt; lineValue) count++;
+    if (direction === 'Over' &amp;&amp; simulated &gt; lineValue) count++;
+  }
+  return count / nSimulations;
+}
+
+/**
+ * Combined probability: weighted average of model probability, simulation, and sharp odds.
+ */
+export function combinedProbability(
+  modelProb?: number,
+  simProb?: number,
+  sharpProb?: number,
+): number {
+  const weights: [number, number][] = [];
+  if (modelProb != null &amp;&amp; modelProb &gt; 0) weights.push([modelProb, 0.3]);
+  if (simProb != null &amp;&amp; simProb &gt; 0) weights.push([simProb, 0.3]);
+  if (sharpProb != null &amp;&amp; sharpProb &gt; 0) weights.push([sharpProb, 0.4]);
+
+  if (weights.length === 0) return 0;
+
+  const totalWeight = weights.reduce((sum, [_, w]) =&gt; sum + w, 0);
+  return weights.reduce((sum, [prob, w]) =&gt; sum + prob * (w / totalWeight), 0);
+}
+
+/** Box-Muller transform for normal random. */
+function randomNormal(mean: number = 0, std: number = 1): number {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  const num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return num * std + mean;
+}</code></pre>
+
+      <div class="callout ok">
+        <div class="callout-title">Three probability sources</div>
+        <p>Probability comes from three sources: model (Normal CDF), simulation (Monte Carlo), and market (sharp odds). Sharp odds get the highest weight (0.4) because the market is the most efficient predictor.</p>
+      </div>
+    </section>
+
+    <!-- ===== STEP 8 ===== -->
+    <section id="step8">
+      <div class="chapter-header">
+        <span class="chapter-label">Step 8</span>
+        <h2>Combination generation and scoring</h2>
+      </div>
+      <p class="chapter-lead">Generate all valid C(n,k) combinations, score them with a multi-factor system including stochastic rolls, and select the best slips with player and stat caps.</p>
+
+      <h3><code>src/engine/combinations.ts</code></h3>
+<pre><code>import type { Line } from '../sports/models.js';
+
+/**
+ * Generate all C(n, k) combinations of lines, filtering invalid ones.
+ * Invalid combo = same player appears twice OR all lines from one team.
+ */
+export function generateValidCombinations(lines: Line[], slipSize: number): Line[][] {
+  const result: Line[][] = [];
+  const stack: { index: number; combination: Line[] }[] = [{ index: 0, combination: [] }];
+
+  while (stack.length &gt; 0) {
+    const { index, combination } = stack.pop()!;
+
+    if (combination.length === slipSize) {
+      if (isValidCombination(combination)) {
+        result.push(combination);
+      }
+      continue;
+    }
+
+    for (let i = index; i &lt; lines.length; i++) {
+      const name = `${lines[i].firstName} ${lines[i].lastName}`;
+      const hasSamePlayer = combination.some(
+        (item) =&gt; `${item.firstName} ${item.lastName}` === name,
+      );
+
+      if (!hasSamePlayer) {
+        stack.push({ index: i + 1, combination: [...combination, lines[i]] });
+      }
+    }
+  }
+
+  return result;
+}
+
+function isValidCombination(combo: Line[]): boolean {
+  const players = new Set(combo.map((l) =&gt; `${l.firstName} ${l.lastName}`));
+  if (players.size !== combo.length) return false;
+
+  const teams = new Set(combo.map((l) =&gt; l.team));
+  if (teams.size &lt;= 1) return false;
+
+  return true;
+}</code></pre>
+
+      <h3><code>src/engine/scoring.ts</code></h3>
+<pre><code>import type { Line } from '../sports/models.js';
+
+interface ScoringOptions {
+  maxRolls?: number;
+  underPenalty?: number;
+  lowPropPenalty?: number;
+  contentionPenalty?: number;
+  fantasyPenalty?: number;
+}
+
+/**
+ * Score a combination of lines. Higher = better.
+ *
+ * The scoring system is intentionally non-deterministic. Lines are ranked by
+ * probability, and higher-ranked lines get more "rolls" (random draws).
+ * This ensures the best slips appear most frequently while still including
+ * slightly less optimal but still +EV combinations.
+ */
+export function scoreCombination(
+  combo: Line[],
+  allLines: Line[],
+  options: ScoringOptions = {},
+): number {
+  const {
+    maxRolls = 2,
+    underPenalty = -0.05,
+    lowPropPenalty = -0.075,
+    contentionPenalty = -0.05,
+    fantasyPenalty = -0.05,
+  } = options;
+
+  const maxScore = 0.725;
+
+  let totalScore = 0;
+  let unders = 0;
+  let lowProps = 0;
+  let fantasyProps = 0;
+  const contendingStats: Record&lt;string, Record&lt;string, Record&lt;string, number&gt;&gt;&gt; = {};
+
+  for (const line of combo) {
+    const rank = allLines.findIndex((l) =&gt; l.probability === line.probability);
+    const percentile = 1 - rank / allLines.length;
+
+    const rollsGiven = Math.max(1.5, maxRolls * percentile);
+    const fullRolls = Math.floor(rollsGiven);
+    const partialRoll = Math.random() &lt; (rollsGiven - fullRolls) ? 1 : 0;
+    const totalRolls = fullRolls + partialRoll;
+
+    const maxRollValue = Math.min(line.probability ?? 0.5, maxScore);
+    const minRollValue = maxRollValue / 5;
+
+    let lineScore = 0;
+    for (let i = 0; i &lt; totalRolls; i++) {
+      lineScore += Math.max(Math.random() * maxRollValue, minRollValue);
+    }
+    totalScore += lineScore;
+
+    if (line.betDirection === 'Under') unders++;
+    if (line.propType === 'Fantasy Points') fantasyProps++;
+
+    const lowThresholds: Record&lt;string, number&gt; = {
+      '3-Pointers Made': 3.5, Turnovers: 2.5, Steals: 2.5,
+      Points: 8.5, 'Fantasy Points': 12.5, 'Pts+Asts': 9.5,
+      'Pts+Rebs': 9.5, 'Pts+Rebs+Asts': 10.5,
+    };
+    if (lowThresholds[line.propType] &amp;&amp; line.propValue &lt;= lowThresholds[line.propType]) {
+      lowProps++;
+    }
+
+    const team = line.team;
+    contendingStats[team] ??= {};
+    contendingStats[team][line.propType] ??= {};
+    contendingStats[team][line.propType][line.betDirection] =
+      (contendingStats[team][line.propType][line.betDirection] ?? 0) + 1;
+  }
+
+  let contentionScore = 0;
+  for (const team of Object.values(contendingStats)) {
+    for (const [propType, directions] of Object.entries(team)) {
+      for (const count of Object.values(directions)) {
+        if (count &gt; 1) {
+          const penalty = propType === 'Points' ? 3 : 0.75;
+          contentionScore += penalty * (count - 1);
+        }
+      }
+    }
+  }
+
+  const adjustments =
+    unders * underPenalty * totalScore +
+    lowProps * lowPropPenalty * totalScore +
+    contentionScore * contentionPenalty * totalScore +
+    fantasyProps * fantasyPenalty * totalScore;
+
+  return totalScore + adjustments;
+}</code></pre>
+
+      <h3><code>src/engine/picker.ts</code></h3>
+<pre><code>import type { Line, Slip } from '../sports/models.js';
+import { scoreCombination } from './scoring.js';
+
+interface PickerOptions {
+  unitSize: number;
+  maxAtRisk: number;
+  limitPlayerRatio?: number;
+  limitPropRatio?: number;
+}
+
+/**
+ * Select the best slips from scored combinations.
+ * Enforces caps on how often a single player or stat can appear
+ * across all selected slips &mdash; prevents overexposure.
+ */
+export function pickSlips(
+  scoredCombinations: { combo: Line[]; score: number }[],
+  options: PickerOptions,
+): Slip[] {
+  const { unitSize, maxAtRisk, limitPlayerRatio = 0.12, limitPropRatio = 0.1 } = options;
+
+  const sorted = [...scoredCombinations].sort((a, b) =&gt; b.score - a.score);
+  const maxSlips = Math.floor(maxAtRisk / unitSize);
+  const playerCap = Math.ceil(limitPlayerRatio * maxSlips);
+  const statCap = Math.ceil(limitPropRatio * maxSlips);
+
+  const playerCounts: Record&lt;string, number&gt; = {};
+  const statCounts: Record&lt;string, number&gt; = {};
+  const selected: Slip[] = [];
+
+  for (const { combo, score } of sorted) {
+    if (selected.length &gt;= maxSlips) break;
+
+    const underPlayerCap = combo.every((line) =&gt; {
+      const name = `${line.firstName} ${line.lastName}`;
+      return (playerCounts[name] ?? 0) + 1 &lt;= playerCap;
+    });
+
+    const underStatCap = combo.every((line) =&gt; {
+      const key = `${line.firstName} ${line.lastName}|${line.propType}`;
+      return (statCounts[key] ?? 0) + 1 &lt;= statCap;
+    });
+
+    if (underPlayerCap &amp;&amp; underStatCap) {
+      for (const line of combo) {
+        const name = `${line.firstName} ${line.lastName}`;
+        const statKey = `${name}|${line.propType}`;
+        playerCounts[name] = (playerCounts[name] ?? 0) + 1;
+        statCounts[statKey] = (statCounts[statKey] ?? 0) + 1;
+      }
+
+      const probabilities = combo.map((l) =&gt; l.probability ?? 0.5);
+      selected.push({
+        lines: combo,
+        betSize: unitSize,
+        score,
+        totalProbability: probabilities.reduce((a, b) =&gt; a * b, 1),
+      });
+    }
+  }
+
+  return selected;
+}</code></pre>
+
+      <div class="callout critical">
+        <div class="callout-title">Non-deterministic by design</div>
+        <p>The scoring system uses stochastic rolls intentionally. Higher-probability lines get more rolls but the randomness ensures variety in generated slips. Do not replace this with a deterministic sort. Player caps (12%) and stat caps (10%) prevent overexposure to correlated risk.</p>
+      </div>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="/dfs-engine/part-1.html" class="phase-nav-link"><span class="phase-nav-label">Previous</span>Part 1: Foundation</a>
+      <a href="/dfs-engine/part-3.html" class="phase-nav-link"><span class="phase-nav-label">Next</span>Part 3: Infrastructure</a>
+    </nav>
+
+    <footer>
+      <p>DFS Engine Build Guide / Part 2 covers the core engine: sharp odds integration, probability modeling, combination generation, and multi-factor scoring.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="/dfs-engine/js/shared.js" defer></script>
+<script src="/dfs-engine/js/theme.js" defer></script>
+<script src="/dfs-engine/js/sidebar.js" defer></script>
+</body>
+</html>

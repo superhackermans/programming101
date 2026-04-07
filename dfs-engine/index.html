@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="DFS Prop Betting Automation Engine — build instructions for an LLM building a modern +EV identification, slip generation, and automated submission system.">
+<title>DFS Engine Build Guide</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/dfs-engine/css/design-system.css">
+<script>try{if(localStorage.getItem('zth-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+<script>try{var z=localStorage.getItem('zth-zoom');if(z&&+z>=50&&+z<=200)document.documentElement.style.zoom=+z/100}catch(e){}</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="var(--accent)"></path>
+    </marker>
+  </defs>
+</svg>
+
+<button class="hamburger" id="hamburger" aria-label="Open navigation">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<button class="toggle" id="themeToggle" aria-label="Toggle theme">
+  <svg class="is" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  <svg class="im" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+
+<aside class="sidebar" id="sidebar">
+  <a href="/" class="sidebar-logo"><span>Learning Material</span>DFS Engine Build Guide</a>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Overview</div>
+    <a href="/dfs-engine/index.html#overview" class="toc-link"><span class="toc-num">00</span>What You Are Building</a>
+    <a href="/dfs-engine/index.html#stack" class="toc-link"><span class="toc-num">01</span>Tech Stack</a>
+    <a href="/dfs-engine/index.html#structure" class="toc-link"><span class="toc-num">02</span>Project Structure</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Foundation</div>
+    <a href="/dfs-engine/part-1.html#step1" class="toc-link"><span class="toc-num">03</span>Project Initialization</a>
+    <a href="/dfs-engine/part-1.html#step2" class="toc-link"><span class="toc-num">04</span>Core Type System</a>
+    <a href="/dfs-engine/part-1.html#step3" class="toc-link"><span class="toc-num">05</span>Platform Adapter</a>
+    <a href="/dfs-engine/part-1.html#step4" class="toc-link"><span class="toc-num">06</span>PrizePicks Client</a>
+    <a href="/dfs-engine/part-1.html#step5" class="toc-link"><span class="toc-num">07</span>Underdog Client</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Core Engine</div>
+    <a href="/dfs-engine/part-2.html#step6" class="toc-link"><span class="toc-num">08</span>Sharp Odds and +EV</a>
+    <a href="/dfs-engine/part-2.html#step7" class="toc-link"><span class="toc-num">09</span>Probability Engine</a>
+    <a href="/dfs-engine/part-2.html#step8" class="toc-link"><span class="toc-num">10</span>Combinations and Scoring</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Infrastructure</div>
+    <a href="/dfs-engine/part-3.html#step9" class="toc-link"><span class="toc-num">11</span>Redis Cache</a>
+    <a href="/dfs-engine/part-3.html#step10" class="toc-link"><span class="toc-num">12</span>Browser Submission</a>
+    <a href="/dfs-engine/part-3.html#step11" class="toc-link"><span class="toc-num">13</span>Database Schema</a>
+    <a href="/dfs-engine/part-3.html#step12" class="toc-link"><span class="toc-num">14</span>CLI Entry Point</a>
+    <a href="/dfs-engine/part-3.html#step13" class="toc-link"><span class="toc-num">15</span>Config and Logger</a>
+    <a href="/dfs-engine/part-3.html#step14" class="toc-link"><span class="toc-num">16</span>Docker Setup</a>
+    <a href="/dfs-engine/part-3.html#step15" class="toc-link"><span class="toc-num">17</span>Testing</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Reference</div>
+    <a href="/dfs-engine/part-3.html#build-order" class="toc-link"><span class="toc-num">A</span>Build Order</a>
+    <a href="/dfs-engine/part-3.html#lessons" class="toc-link"><span class="toc-num">B</span>Key Lessons</a>
+    <a href="/dfs-engine/part-3.html#api-ref" class="toc-link"><span class="toc-num">C</span>API Endpoints</a>
+    <a href="/dfs-engine/part-3.html#diff" class="toc-link"><span class="toc-num">D</span>What Changed</a>
+  </div>
+</aside>
+
+<div class="main" id="main-content">
+  <section class="hero">
+    <div class="hero-badge">DFS Engine Build Guide &mdash; April 2026</div>
+    <h1>A modern <em>DFS prop betting automation engine</em> from scratch</h1>
+    <p class="hero-sub">Build instructions for an LLM creating a +EV identification, slip generation, and automated submission system targeting PrizePicks and Underdog Fantasy.</p>
+    <div class="hero-meta"><span>15 build steps</span><span>TypeScript strict</span><span>CLI tool</span></div>
+  </section>
+
+  <div class="content-wrap">
+    <section id="overview">
+      <div class="chapter-header">
+        <span class="chapter-label">Overview</span>
+        <h2>What you are building</h2>
+      </div>
+      <p class="chapter-lead">An automated system that pulls player prop lines from DFS platforms, compares them against sharp sportsbook odds, identifies +EV edges, generates optimal slip combinations, and submits them via headless browser automation.</p>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="eyebrow">Data Pipeline</span>
+          <h4>Pull and compare lines</h4>
+          <p>Fetch player props from PrizePicks and Underdog Fantasy, pull sharp odds from sportsbook aggregators, and find divergences.</p>
+        </div>
+        <div class="summary-card">
+          <span class="eyebrow">Analysis Engine</span>
+          <h4>Probability models and scoring</h4>
+          <p>Normal CDF, Monte Carlo simulation, multi-factor scoring with stochastic rolls, and combinatorial optimization with player and stat caps.</p>
+        </div>
+        <div class="summary-card">
+          <span class="eyebrow">Automation</span>
+          <h4>Submit and track</h4>
+          <p>Headless browser submission via Steel.dev with anti-detection, plus Supabase persistence for backtesting and P&amp;L monitoring.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-title">For LLMs</div>
+        <p>These instructions are designed for an LLM building this project from scratch. The reference codebase is the original &ldquo;better/golflifters&rdquo; repo.</p>
+      </div>
+    </section>
+
+    <section id="stack">
+      <div class="chapter-header">
+        <span class="chapter-label">Step 01</span>
+        <h2>Tech stack</h2>
+      </div>
+      <p class="chapter-lead">A modern Node.js CLI tool with TypeScript strict mode, no web framework.</p>
+
+      <div class="prompt-block">
+        <span class="label">Stack</span>
+<pre><code>Runtime:         Node.js 22 LTS (ES modules)
+Language:        TypeScript 5.x (strict mode)
+Browser:         Playwright + Steel.dev cloud sessions
+HTTP Client:     undici (Node built-in)
+Database:        Supabase (PostgreSQL)
+Cache:           Redis 7+ with ioredis
+Odds Data:       The Odds API + OddsPapi
+DFS Lines:       PrizePicks API + Underdog scraper
+Stats Data:      nba_api (Python), DataGolf API, ESPN API
+Math:            @stdlib/stats, simple-statistics
+Formatting:      Biome (replaces Prettier + ESLint)
+Testing:         Vitest
+CI:              GitHub Actions
+Package Manager: pnpm</code></pre>
+      </div>
+    </section>
+
+    <section id="structure">
+      <div class="chapter-header">
+        <span class="chapter-label">Step 02</span>
+        <h2>Project structure</h2>
+      </div>
+      <p class="chapter-lead">Create this exact directory structure. Every platform normalizer produces Line objects. Every engine function operates on Line[] and Slip[].</p>
+
+      <div class="prompt-block">
+        <span class="label">Directory tree</span>
+<pre><code>better/
+├── src/
+│   ├── index.ts                     # CLI entry point (commander)
+│   ├── config.ts                    # Env validation with zod
+│   ├── constants.ts                 # Sport enums, prop types, thresholds
+│   │
+│   ├── platforms/                   # Platform adapters (the adapter pattern)
+│   │   ├── adapter.ts               # Abstract PlatformAdapter interface
+│   │   ├── prizepicks/
+│   │   │   ├── client.ts            # PrizePicks API client
+│   │   │   ├── normalize.ts         # Raw API → Line model
+│   │   │   ├── submit.ts            # Browser-based slip submission
+│   │   │   └── types.ts             # PrizePicks-specific API types
+│   │   ├── underdog/
+│   │   │   ├── client.ts            # Underdog API client
+│   │   │   ├── normalize.ts         # Raw API → Line model
+│   │   │   ├── submit.ts            # Browser-based slip submission
+│   │   │   └── types.ts             # Underdog-specific API types
+│   │   └── registry.ts              # Platform registry for CLI dispatch
+│   │
+│   ├── odds/                        # Sharp odds aggregation
+│   │   ├── the-odds-api.ts          # The Odds API client
+│   │   ├── oddspapi.ts              # OddsPapi client (Pinnacle, sharp books)
+│   │   └── consensus.ts             # Multi-book implied probability calculator
+│   │
+│   ├── sports/                      # Sport-specific models &amp; logic
+│   │   ├── models.ts                # Line, Slip, PropType interfaces
+│   │   ├── basketball.ts            # NBA-specific enrichment &amp; prop types
+│   │   ├── golf.ts                  # Golf strokes-gained model
+│   │   ├── football.ts              # NFL prop types
+│   │   └── tennis.ts                # Tennis prop types
+│   │
+│   ├── engine/                      # Core analysis &amp; generation engine
+│   │   ├── probability.ts           # Normal CDF, Poisson, Monte Carlo sim
+│   │   ├── combinations.ts          # C(n,k) generator with validation
+│   │   ├── scoring.ts               # Multi-factor slip scoring
+│   │   ├── picker.ts                # Slip selection with player/stat caps
+│   │   └── ev.ts                    # +EV calculation (DFS line vs sharp consensus)
+│   │
+│   ├── browser/                     # Browser automation layer
+│   │   ├── session.ts               # Steel.dev session manager (or Camoufox)
+│   │   ├── stealth.ts               # Ghost cursor, typing sim, behavioral
+│   │   └── captcha.ts               # CAPTCHA solving integration
+│   │
+│   ├── data/                        # External data source clients
+│   │   ├── datagolf.ts              # DataGolf API (golf projections)
+│   │   ├── nba-stats.ts             # NBA stats (wraps nba_api Python)
+│   │   ├── espn.ts                  # ESPN hidden API
+│   │   └── historical.ts            # Historical stats loader
+│   │
+│   ├── storage/                     # Persistence layer
+│   │   ├── supabase.ts              # Supabase client + queries
+│   │   ├── redis.ts                 # Redis cache-through utility
+│   │   └── schemas.sql              # Database schema
+│   │
+│   └── utils/                       # Shared utilities
+│       ├── logger.ts                # Pino structured logger
+│       ├── csv.ts                   # CSV read/write with PapaParse
+│       └── retry.ts                 # Exponential backoff helper
+│
+├── tests/
+│   ├── engine/
+│   │   ├── probability.test.ts      # Unit tests for probability calculations
+│   │   ├── scoring.test.ts          # Unit tests for scoring model
+│   │   ├── combinations.test.ts     # Unit tests for combo generation
+│   │   └── ev.test.ts               # Unit tests for +EV calculator
+│   ├── platforms/
+│   │   ├── prizepicks.test.ts       # Normalizer tests with fixtures
+│   │   └── underdog.test.ts         # Normalizer tests with fixtures
+│   └── fixtures/                    # Mock API response data
+│       ├── prizepicks-projections.json
+│       └── underdog-lines.json
+│
+├── scripts/
+│   ├── fetch-lines.ts               # Standalone: fetch + display lines
+│   ├── analyze.ts                   # Standalone: run analysis on fetched lines
+│   └── submit.ts                    # Standalone: submit from CSV
+│
+├── .env.example
+├── package.json
+├── tsconfig.json
+├── biome.json
+├── vitest.config.ts
+├── Dockerfile
+├── docker-compose.yml               # App + Redis
+└── README.md</code></pre>
+      </div>
+    </section>
+
+    <section id="parts">
+      <div class="chapter-header">
+        <span class="chapter-label">Structure</span>
+        <h2>The three parts</h2>
+      </div>
+
+      <a href="/dfs-engine/part-1.html" class="phase-card">
+        <div class="phase-num">Part 1</div>
+        <h3>Foundation and Platform Clients</h3>
+        <p>Project initialization, core types, adapter interface, PrizePicks and Underdog clients.</p>
+        <div class="phase-meta">Steps 1&ndash;5</div>
+      </a>
+
+      <a href="/dfs-engine/part-2.html" class="phase-card">
+        <div class="phase-num">Part 2</div>
+        <h3>Core Engine</h3>
+        <p>Sharp odds integration, probability models, combination generation, multi-factor scoring, and slip selection.</p>
+        <div class="phase-meta">Steps 6&ndash;8</div>
+      </a>
+
+      <a href="/dfs-engine/part-3.html" class="phase-card">
+        <div class="phase-num">Part 3</div>
+        <h3>Infrastructure and Reference</h3>
+        <p>Redis cache, browser automation, database schema, CLI, Docker, testing, and reference materials.</p>
+        <div class="phase-meta">Steps 9&ndash;15 + Reference</div>
+      </a>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="/" class="phase-nav-link"><span class="phase-nav-label">Back</span>Learning materials hub</a>
+      <a href="/dfs-engine/part-1.html" class="phase-nav-link"><span class="phase-nav-label">Next</span>Part 1: Foundation and Platform Clients</a>
+    </nav>
+
+    <footer>
+      <p>DFS Engine Build Guide / LLM build instructions / April 2026</p>
+    </footer>
+  </div>
+</div>
+
+<script src="/dfs-engine/js/shared.js" defer></script>
+<script src="/dfs-engine/js/theme.js" defer></script>
+<script src="/dfs-engine/js/sidebar.js" defer></script>
+</body>
+</html>

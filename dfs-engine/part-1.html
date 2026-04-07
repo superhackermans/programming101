@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Part 1 of the DFS Engine Build Guide: project initialization, core types, platform adapter interface, PrizePicks and Underdog clients.">
+<title>DFS Engine Build Guide - Part 1</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/dfs-engine/css/design-system.css">
+<script>try{if(localStorage.getItem('zth-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+<script>try{var z=localStorage.getItem('zth-zoom');if(z&&+z>=50&&+z<=200)document.documentElement.style.zoom=+z/100}catch(e){}</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="var(--accent)"></path>
+    </marker>
+  </defs>
+</svg>
+
+<button class="hamburger" id="hamburger" aria-label="Open navigation">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<button class="toggle" id="themeToggle" aria-label="Toggle theme">
+  <svg class="is" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  <svg class="im" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+
+<aside class="sidebar" id="sidebar">
+  <a href="/" class="sidebar-logo"><span>Learning Material</span>DFS Engine Build Guide</a>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Overview</div>
+    <a href="/dfs-engine/index.html#overview" class="toc-link"><span class="toc-num">00</span>What You Are Building</a>
+    <a href="/dfs-engine/index.html#stack" class="toc-link"><span class="toc-num">01</span>Tech Stack</a>
+    <a href="/dfs-engine/index.html#structure" class="toc-link"><span class="toc-num">02</span>Project Structure</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Foundation</div>
+    <a href="/dfs-engine/part-1.html#step1" class="toc-link"><span class="toc-num">03</span>Project Initialization</a>
+    <a href="/dfs-engine/part-1.html#step2" class="toc-link"><span class="toc-num">04</span>Core Type System</a>
+    <a href="/dfs-engine/part-1.html#step3" class="toc-link"><span class="toc-num">05</span>Platform Adapter</a>
+    <a href="/dfs-engine/part-1.html#step4" class="toc-link"><span class="toc-num">06</span>PrizePicks Client</a>
+    <a href="/dfs-engine/part-1.html#step5" class="toc-link"><span class="toc-num">07</span>Underdog Client</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Core Engine</div>
+    <a href="/dfs-engine/part-2.html#step6" class="toc-link"><span class="toc-num">08</span>Sharp Odds and +EV</a>
+    <a href="/dfs-engine/part-2.html#step7" class="toc-link"><span class="toc-num">09</span>Probability Engine</a>
+    <a href="/dfs-engine/part-2.html#step8" class="toc-link"><span class="toc-num">10</span>Combinations and Scoring</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Infrastructure</div>
+    <a href="/dfs-engine/part-3.html#step9" class="toc-link"><span class="toc-num">11</span>Redis Cache</a>
+    <a href="/dfs-engine/part-3.html#step10" class="toc-link"><span class="toc-num">12</span>Browser Submission</a>
+    <a href="/dfs-engine/part-3.html#step11" class="toc-link"><span class="toc-num">13</span>Database Schema</a>
+    <a href="/dfs-engine/part-3.html#step12" class="toc-link"><span class="toc-num">14</span>CLI Entry Point</a>
+    <a href="/dfs-engine/part-3.html#step13" class="toc-link"><span class="toc-num">15</span>Config and Logger</a>
+    <a href="/dfs-engine/part-3.html#step14" class="toc-link"><span class="toc-num">16</span>Docker Setup</a>
+    <a href="/dfs-engine/part-3.html#step15" class="toc-link"><span class="toc-num">17</span>Testing</a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-title">Reference</div>
+    <a href="/dfs-engine/part-3.html#build-order" class="toc-link"><span class="toc-num">A</span>Build Order</a>
+    <a href="/dfs-engine/part-3.html#lessons" class="toc-link"><span class="toc-num">B</span>Key Lessons</a>
+    <a href="/dfs-engine/part-3.html#api-ref" class="toc-link"><span class="toc-num">C</span>API Endpoints</a>
+    <a href="/dfs-engine/part-3.html#diff" class="toc-link"><span class="toc-num">D</span>What Changed</a>
+  </div>
+</aside>
+
+<main id="main-content">
+
+  <!-- Hero -->
+  <section class="hero hero-sm">
+    <span class="badge">Part 1 — Foundation and Platform Clients</span>
+    <h1>Types, adapters, and the first two platform integrations</h1>
+    <p class="sub">Initialize the TypeScript project, define the core data models, create the platform adapter contract, and build the PrizePicks and Underdog Fantasy clients.</p>
+    <div class="meta">
+      <span>Steps 1–5</span>
+      <span>TypeScript strict</span>
+      <span>Two platform adapters</span>
+    </div>
+  </section>
+
+  <!-- Step 1: Project Initialization -->
+  <section id="step1">
+    <div class="chapter-header">
+      <span class="chapter-label">Step 1</span>
+      <h2>Project initialization</h2>
+    </div>
+    <p class="chapter-lead">Set up the pnpm project with TypeScript, Biome, and all dependencies.</p>
+
+    <div class="prompt-block">
+      <span class="label">Init project</span>
+      <pre>mkdir better &amp;&amp; cd better
+pnpm init</pre>
+    </div>
+
+    <div class="prompt-block">
+      <span class="label">package.json</span>
+      <pre>{
+  "name": "better",
+  "version": "2.0.0",
+  "type": "module",
+  "engines": { "node": "&gt;=22" },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "fetch": "tsx scripts/fetch-lines.ts",
+    "analyze": "tsx scripts/analyze.ts",
+    "submit": "tsx scripts/submit.ts"
+  }
+}</pre>
+    </div>
+
+    <div class="prompt-block">
+      <span class="label">Install dependencies</span>
+      <pre># Core
+pnpm add typescript tsx @types/node
+
+# Math &amp; Stats
+pnpm add @stdlib/stats-base-dists-normal-cdf @stdlib/stats-base-dists-poisson-cdf simple-statistics
+
+# HTTP &amp; API
+pnpm add zod dotenv
+
+# Browser automation
+pnpm add playwright ghost-cursor-playwright
+
+# Database &amp; Cache
+pnpm add @supabase/supabase-js ioredis
+
+# Data processing
+pnpm add papaparse @types/papaparse lodash-es @types/lodash-es dayjs
+
+# Logging &amp; CLI
+pnpm add pino commander chalk
+
+# Dev
+pnpm add -D vitest @biomejs/biome @types/node</pre>
+    </div>
+
+    <div class="prompt-block">
+      <span class="label">tsconfig.json</span>
+      <pre>{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "tests"]
+}</pre>
+    </div>
+
+    <div class="prompt-block">
+      <span class="label">.env.example</span>
+      <pre># Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Odds APIs
+THE_ODDS_API_KEY=your-key
+ODDSPAPI_KEY=your-key
+
+# DataGolf
+DATAGOLF_API_KEY=your-key
+
+# Steel.dev (cloud browser)
+STEEL_API_KEY=your-key
+
+# Platform credentials
+PRIZEPICKS_EMAIL=
+PRIZEPICKS_PASSWORD=
+UNDERDOG_EMAIL=
+UNDERDOG_PASSWORD=
+
+# Operational
+LOG_LEVEL=info
+DRY_RUN=true
+MAX_AT_RISK=500
+UNIT_SIZE=10</pre>
+    </div>
+  </section>
+
+  <!-- Step 2: Core Type System -->
+  <section id="step2">
+    <div class="chapter-header">
+      <span class="chapter-label">Step 2</span>
+      <h2>Core type system</h2>
+    </div>
+    <p class="chapter-lead">Define the constants, enums, and data models. Every platform normalizer must produce Line objects. Every engine function operates on Line[] and Slip[].</p>
+
+    <h3>src/constants.ts</h3>
+    <pre><code>export const Sport = {
+  NBA: 'nba',
+  NFL: 'nfl',
+  Golf: 'golf',
+  Tennis: 'tennis',
+  MLB: 'mlb',
+} as const;
+export type Sport = (typeof Sport)[keyof typeof Sport];
+
+export const BetDirection = {
+  Over: 'Over',
+  Under: 'Under',
+} as const;
+export type BetDirection = (typeof BetDirection)[keyof typeof BetDirection];
+
+export const Platform = {
+  PrizePicks: 'prizepicks',
+  Underdog: 'underdog',
+} as const;
+export type Platform = (typeof Platform)[keyof typeof Platform];
+
+export const BasketballProp = {
+  Points: 'Points',
+  Rebounds: 'Rebounds',
+  Assists: 'Assists',
+  Steals: 'Steals',
+  Blocks: 'Blocks',
+  Turnovers: 'Turnovers',
+  ThreePointMade: '3-Pointers Made',
+  FantasyPoints: 'Fantasy Points',
+  PointsAssists: 'Pts+Asts',
+  PointsRebounds: 'Pts+Rebs',
+  ReboundsAssists: 'Rebs+Asts',
+  PointsReboundsAssists: 'Pts+Rebs+Asts',
+  BlocksSteals: 'Blks+Stls',
+} as const;
+export type BasketballProp = (typeof BasketballProp)[keyof typeof BasketballProp];
+
+// Profit thresholds — the minimum implied probability required to bet.
+// A 2-pick at PrizePicks pays 3x, so breakeven is 1/3 = 0.333.
+// But each leg needs to independently exceed this threshold.
+export const ProfitThreshold = {
+  prizepicks: 0.545,   // ~54.5% win rate needed for +EV on standard payouts
+  underdog: 0.545,
+} as const;</code></pre>
+
+    <h3>src/sports/models.ts</h3>
+    <pre><code>import type { BetDirection, Sport } from '../constants.js';
+
+export interface Line {
+  // Identity
+  firstName: string;
+  lastName: string;
+  team: string;
+  sport: Sport;
+
+  // The prop
+  propType: string;
+  propValue: number;
+  betDirection: BetDirection;
+
+  // Platform-specific
+  platform: string;
+  platformPropId: string;
+  eventName: string;
+
+  // Calculated (enriched by engine)
+  probability?: number;
+  sharpProbability?: number;
+  ev?: number;
+  simProbability?: number;
+
+  // Submission metadata
+  identifyingInfo?: Record&lt;string, unknown&gt;;
+}
+
+export interface Slip {
+  lines: Line[];
+  betSize: number;
+  score?: number;
+  totalProbability?: number;
+  expectedPayout?: number;
+}</code></pre>
+
+    <div class="callout info">
+      <div class="callout-title">The Line Contract</div>
+      <p>The Line interface is the core contract. Every platform client must normalize its API response into this shape. Every engine function consumes and produces Lines.</p>
+    </div>
+  </section>
+
+  <!-- Step 3: Platform Adapter Interface -->
+  <section id="step3">
+    <div class="chapter-header">
+      <span class="chapter-label">Step 3</span>
+      <h2>Platform adapter interface</h2>
+    </div>
+    <p class="chapter-lead">Every platform must implement this interface. This is the most important architectural contract.</p>
+
+    <h3>src/platforms/adapter.ts</h3>
+    <pre><code>import type { Line, Slip } from '../sports/models.js';
+import type { Sport } from '../constants.js';
+
+export interface PlatformAdapter {
+  readonly name: string;
+  readonly supportedSports: Sport[];
+
+  /** Fetch raw prop lines from the platform and normalize to Line[] */
+  getLines(sport: Sport): Promise&lt;Line[]&gt;;
+
+  /** Submit a slip to the platform via browser automation */
+  submitSlip(slip: Slip): Promise&lt;{ success: boolean; error?: string }&gt;;
+}</code></pre>
+
+    <div class="callout ok">
+      <div class="callout-title">Convention to Contract</div>
+      <p>The original codebase used convention. This version enforces the contract with TypeScript. New platforms only need client, normalizer, and submit — no changes to the engine.</p>
+    </div>
+  </section>
+
+  <!-- Step 4: PrizePicks Client -->
+  <section id="step4">
+    <div class="chapter-header">
+      <span class="chapter-label">Step 4</span>
+      <h2>PrizePicks client</h2>
+    </div>
+    <p class="chapter-lead">PrizePicks has an unofficial REST API. Authentication is Keycloak-based. The projections endpoint is the most accessible and does not require auth for reading.</p>
+
+    <h3>src/platforms/prizepicks/client.ts</h3>
+    <pre><code>import { z } from 'zod';
+import type { Sport } from '../../constants.js';
+import type { Line } from '../../sports/models.js';
+import { normalizePrizePicks } from './normalize.js';
+import { logger } from '../../utils/logger.js';
+
+const PP_BASE = 'https://api.prizepicks.com';
+const PROJECTIONS_URL = `${PP_BASE}/projections`;
+
+interface PPProjection {
+  id: string;
+  type: string;
+  attributes: {
+    adjusted_odds: number | null;
+    board_time: string;
+    description: string;
+    display_stat: string;
+    end_time: string;
+    flash_sale_line_score: number | null;
+    game_id: string;
+    image_url: string;
+    in_play: boolean;
+    is_promo: boolean;
+    league: string;
+    league_id: number;
+    line_score: number;
+    odds_type: string;
+    projection_type: string;
+    refundable: boolean;
+    start_time: string;
+    stat_type: string;
+    status: string;
+    tv_channel: string | null;
+    updated_at: string;
+  };
+  relationships: {
+    new_player: { data: { id: string; type: string } };
+    league: { data: { id: string; type: string } };
+    game: { data: { id: string; type: string } };
+  };
+}
+
+interface PPPlayer {
+  id: string;
+  type: string;
+  attributes: {
+    display_name: string;
+    first_name: string;
+    last_name: string;
+    image_url: string;
+    league: string;
+    league_id: number;
+    market: string;
+    name: string;
+    position: string;
+    team: string;
+    team_name: string;
+  };
+}
+
+export async function fetchPrizePicksLines(sport: Sport): Promise&lt;Line[]&gt; {
+  const leagueMap: Record&lt;string, string&gt; = {
+    nba: 'NBA',
+    nfl: 'NFL',
+    golf: 'PGA',
+    tennis: 'TENNIS',
+    mlb: 'MLB',
+  };
+  const league = leagueMap[sport];
+  if (!league) throw new Error(`Unsupported sport for PrizePicks: ${sport}`);
+
+  const url = `${PROJECTIONS_URL}?per_page=1000&amp;single_stat=true&amp;league_id=${getLeagueId(sport)}`;
+  logger.info({ url, sport }, 'Fetching PrizePicks projections');
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`PrizePicks API error: ${response.status} ${response.statusText}`);
+  }
+
+  const body = await response.json();
+  const projections: PPProjection[] = body.data;
+  const included: (PPPlayer | any)[] = body.included;
+
+  const players = new Map&lt;string, PPPlayer&gt;();
+  for (const item of included) {
+    if (item.type === 'new_player') {
+      players.set(item.id, item);
+    }
+  }
+
+  return normalizePrizePicks(projections, players, sport);
+}
+
+function getLeagueId(sport: Sport): number {
+  const ids: Record&lt;string, number&gt; = {
+    nba: 7, nfl: 2, mlb: 3, golf: 16, tennis: 24,
+  };
+  return ids[sport] ?? 7;
+}</code></pre>
+
+    <h3>src/platforms/prizepicks/normalize.ts</h3>
+    <pre><code>import type { Line } from '../../sports/models.js';
+import type { Sport, BetDirection } from '../../constants.js';
+
+export function normalizePrizePicks(
+  projections: any[],
+  players: Map&lt;string, any&gt;,
+  sport: Sport,
+): Line[] {
+  const lines: Line[] = [];
+
+  for (const proj of projections) {
+    const attrs = proj.attributes;
+    if (attrs.status !== 'pre_game') continue;
+
+    const playerId = proj.relationships.new_player.data.id;
+    const player = players.get(playerId);
+    if (!player) continue;
+
+    const playerAttrs = player.attributes;
+
+    for (const direction of ['Over', 'Under'] as BetDirection[]) {
+      lines.push({
+        firstName: playerAttrs.first_name,
+        lastName: playerAttrs.last_name,
+        team: playerAttrs.team ?? 'UNK',
+        sport,
+        propType: attrs.stat_type,
+        propValue: attrs.line_score,
+        betDirection: direction,
+        platform: 'prizepicks',
+        platformPropId: proj.id,
+        eventName: attrs.description ?? `${playerAttrs.team_name}`,
+        identifyingInfo: {
+          league: attrs.league,
+          odds_type: attrs.odds_type,
+          projection_type: attrs.projection_type,
+          game_id: attrs.game_id,
+        },
+      });
+    }
+  }
+
+  return lines;
+}</code></pre>
+  </section>
+
+  <!-- Step 5: Underdog Fantasy Client -->
+  <section id="step5">
+    <div class="chapter-header">
+      <span class="chapter-label">Step 5</span>
+      <h2>Underdog Fantasy client</h2>
+    </div>
+    <p class="chapter-lead">Underdog uses an internal REST API. Auth requires a browser login flow to capture cookies.</p>
+
+    <h3>src/platforms/underdog/client.ts</h3>
+    <pre><code>import type { Sport } from '../../constants.js';
+import type { Line } from '../../sports/models.js';
+import { normalizeUnderdog } from './normalize.js';
+import { logger } from '../../utils/logger.js';
+
+const UD_API = 'https://api.underdogfantasy.com';
+const LINES_URL = `${UD_API}/beta/v5/over_under_lines`;
+const TEAMS_URL = 'https://stats.underdogfantasy.com/v1/teams';
+
+export async function fetchUnderdogLines(
+  sport: Sport,
+  authCookies?: string,
+): Promise&lt;Line[]&gt; {
+  const headers: Record&lt;string, string&gt; = {
+    'Accept': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+  };
+
+  if (authCookies) {
+    headers['Cookie'] = authCookies;
+  }
+
+  const [linesRes, teamsRes] = await Promise.all([
+    fetch(LINES_URL, { headers }),
+    fetch(TEAMS_URL, { headers }),
+  ]);
+
+  if (!linesRes.ok) {
+    throw new Error(`Underdog API error: ${linesRes.status}. Re-auth may be needed.`);
+  }
+
+  const linesData = await linesRes.json();
+  const teamsData = await teamsRes.json();
+
+  return normalizeUnderdog(linesData, teamsData, sport);
+}</code></pre>
+
+    <h3>src/platforms/underdog/normalize.ts</h3>
+    <pre><code>import type { Line } from '../../sports/models.js';
+import type { Sport, BetDirection } from '../../constants.js';
+
+const STAT_MAP: Record&lt;string, string&gt; = {
+  points: 'Points',
+  rebounds: 'Rebounds',
+  assists: 'Assists',
+  steals: 'Steals',
+  blocks: 'Blocks',
+  turnovers: 'Turnovers',
+  three_points_made: '3-Pointers Made',
+  pts_asts: 'Pts+Asts',
+  pts_rebs: 'Pts+Rebs',
+  rebs_asts: 'Rebs+Asts',
+  pts_rebs_asts: 'Pts+Rebs+Asts',
+  blk_stls: 'Blks+Stls',
+  fantasy_points: 'Fantasy Points',
+  strokes: 'Strokes',
+  birdies: 'Birdies',
+  bogeys: 'Bogeys',
+  pass_yards: 'Pass Yards',
+  rush_yards: 'Rush Yards',
+  receiving_yards: 'Receiving Yards',
+  receptions: 'Receptions',
+  completions: 'Completions',
+};
+
+export function normalizeUnderdog(
+  linesData: any,
+  teamsData: any,
+  sport: Sport,
+): Line[] {
+  const lines: Line[] = [];
+
+  const playersById = new Map&lt;string, any&gt;();
+  for (const p of linesData.players ?? []) playersById.set(p.id, p);
+
+  const gamesById = new Map&lt;string, any&gt;();
+  for (const g of linesData.games ?? []) gamesById.set(g.id, g);
+
+  const teamsById = new Map&lt;string, any&gt;();
+  for (const t of teamsData.teams ?? []) teamsById.set(t.id, t);
+
+  const appearancesById = new Map&lt;string, any&gt;();
+  for (const a of linesData.appearances ?? []) appearancesById.set(a.id, a);
+
+  for (const ouLine of linesData.over_under_lines ?? []) {
+    const stat = ouLine.over_under?.appearance_stat?.stat;
+    const propType = STAT_MAP[stat];
+    if (!propType) continue;
+
+    const appearanceId = ouLine.over_under?.appearance_stat?.appearance_id;
+    const appearance = appearancesById.get(appearanceId);
+    if (!appearance) continue;
+
+    const player = playersById.get(appearance.player_id);
+    if (!player) continue;
+
+    if (player.sport_id?.toLowerCase() !== sport) continue;
+
+    const game = gamesById.get(appearance.match_id);
+    const team = teamsById.get(appearance.team_id);
+
+    let eventName = 'Unknown';
+    if (game) {
+      const away = teamsById.get(game.away_team_id);
+      const home = teamsById.get(game.home_team_id);
+      eventName = `${home?.abbr ?? '?'} vs ${away?.abbr ?? '?'}`;
+    }
+
+    for (const option of ouLine.options ?? []) {
+      const direction: BetDirection = option.choice === 'higher' ? 'Over' : 'Under';
+      lines.push({
+        firstName: player.first_name,
+        lastName: player.last_name,
+        team: team?.abbr ?? 'UNK',
+        sport,
+        propType,
+        propValue: parseFloat(ouLine.stat_value),
+        betDirection: direction,
+        platform: 'underdog',
+        platformPropId: option.over_under_line_id,
+        eventName,
+        identifyingInfo: {
+          overUnderId: ouLine.over_under_id,
+          choice: option.choice,
+        },
+      });
+    }
+  }
+
+  return lines;
+}</code></pre>
+
+    <div class="callout warn">
+      <div class="callout-title">API Version May Change</div>
+      <p>The Underdog API version (v5) may have incremented. If v5 fails, try v6, v7, etc. Alternatively, intercept the live app's network requests to discover the current version.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="/dfs-engine/js/shared.js" defer></script>
+<script src="/dfs-engine/js/theme.js" defer></script>
+<script src="/dfs-engine/js/sidebar.js" defer></script>
+</body>
+</html>

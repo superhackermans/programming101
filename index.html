@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dante4000 | Learning Material</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <script>try{if(localStorage.getItem('zth-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <style>
 :root {
@@ -67,7 +67,7 @@ body {
 
 /* Hub */
 .hub {
-  max-width: 720px; width: 100%;
+  max-width: 980px; width: 100%;
   padding: 3rem 2rem; text-align: center;
 }
 .logo {
@@ -88,7 +88,7 @@ body {
 
 /* Guide cards */
 .guides {
-  display: grid; grid-template-columns: 1fr 1fr;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.2rem; text-align: left;
 }
 .guide-card {
@@ -157,6 +157,13 @@ footer {
       <h2>LLMs for HMI Design</h2>
       <p>Expert reference for applying large language models to truck HMI design workflows and Fuso interface systems.</p>
       <div class="guide-meta">Reference docs &middot; HMI &middot; LLMs</div>
+    </a>
+
+    <a href="claude-code-quickstart/index.html" class="guide-card">
+      <div class="guide-icon">&#9874;</div>
+      <h2>Claude Code Quick Start</h2>
+      <p>A beginner-first guide to terminal basics, Bash, Git, Claude Code setup, a safe first project, and the higher-level orchestration picture.</p>
+      <div class="guide-meta">Beginner guide &middot; Terminal + Git &middot; Claude Code</div>
     </a>
   </div>
 </div>

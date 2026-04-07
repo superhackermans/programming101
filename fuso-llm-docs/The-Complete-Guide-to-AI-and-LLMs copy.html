@@ -108,6 +108,8 @@ code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:.
 .footer{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:.85rem}
 @media(max-width:700px){.cg{grid-template-columns:1fr}.sg{grid-template-columns:1fr}.hero h1{font-size:2.4rem}h2{font-size:2rem}.hero-meta{flex-direction:column;gap:.75rem}.pr{flex-direction:column;gap:.75rem}.main-col{padding:0 1.25rem 6rem}}
 </style>
+<style>.auth-pending body{visibility:hidden}#auth-overlay{position:fixed;inset:0;z-index:99999;background:#0a0c12;display:flex;align-items:center;justify-content:center;font-family:-apple-system,sans-serif;color:#eef1f8}</style>
+<script>document.documentElement.classList.add("auth-pending")</script>
 </head>
 <body>
 
@@ -647,5 +649,6 @@ Contents
   }
 })();
 </script>
+<script src="/auth.js"></script>
 </body>
 </html>

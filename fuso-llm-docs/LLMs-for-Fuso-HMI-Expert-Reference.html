@@ -141,6 +141,8 @@ footer a{color:var(--accent);text-decoration:none}
 @media(max-width:900px) and (min-width:701px){.stakes-grid{grid-template-columns:1fr 1fr}.stakes-grid .card:last-child{grid-column:1 / -1}}
 @media(max-width:700px){.hero h1{font-size:2rem}.content-wrap{padding:0 1.2rem}section{padding:2rem 0}.card-grid,.cg{grid-template-columns:1fr}.stakes-grid{grid-template-columns:1fr}.hero-meta{flex-direction:column;gap:.5rem}.pr{flex-direction:column;gap:.7rem}}
 </style>
+<style>.auth-pending body{visibility:hidden}#auth-overlay{position:fixed;inset:0;z-index:99999;background:#0a0c12;display:flex;align-items:center;justify-content:center;font-family:-apple-system,sans-serif;color:#eef1f8}</style>
+<script>document.documentElement.classList.add("auth-pending")</script>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0"><defs>
@@ -1851,5 +1853,6 @@ What is the latest publicly available information about [ARCHION Corporation / C
   });
 })();
 </script>
+<script src="/auth.js"></script>
 </body>
 </html>
